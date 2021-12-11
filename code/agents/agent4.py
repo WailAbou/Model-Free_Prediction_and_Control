@@ -1,25 +1,29 @@
-from typing import Dict
-from agents.base_agent import BaseAgent
-from return_data import Return
+from random import random
+from maze import Maze
 from policy import Policy
-from maze_cell import MazeCell
-from collections import OrderedDict
+from agents.base_agent import BaseAgent, conditional_runner
 
 
 class Agent4(BaseAgent):
     def run(self, print_values: bool = True) -> float:
-        algorithm = lambda returns: self.temporal_difference_learning(returns)
-        self.policy, returns = Policy(Policy.random), {}
-        total = self.conditional_runner(algorithm, 1e4, 1e6, returns)
+        self.value_iteration(self, self.discount)
+        actions = self.policy.get_actions(self.maze.maze_cells)
+        self.maze.reset_values()
+
+        self.policy = Policy(Policy.optimal, actions)
+        total = self.temporal_difference_learning(self)
+        
         if print_values: self.visualize()
         return total
     
-    def temporal_difference_learning(self, returns: Dict[MazeCell, Return]) -> float:
+    @conditional_runner
+    def temporal_difference_learning(self) -> float:
         episode = self.maze.generate_episode(*self.maze.get_random_point(), self.policy)
-        first_visit_episode = list(OrderedDict.fromkeys(episode))
-        g = 0
-        for i in range(len(first_visit_episode) - 2, -1, -1):
-            step = first_visit_episode[i]
-            g = self.discount * g + first_visit_episode[i + 1].reward
-            returns[step] = Return() if returns.get(step) == None else returns[step].update_average(g)
-            step.update_value(returns[step].average)
+        for step in episode:
+            action = self.policy.get_action(self.maze.maze_cells, step)
+            if action == None: break
+
+            next_cell = Maze.get_cell(self.maze.maze_cells, step, action.x, action.y)
+            new_value = step.value + 0.9 * (next_cell.reward + self.discount * (next_cell.value - step.value))
+            step.update_value(new_value)
+        return self.maze.total

@@ -1,4 +1,7 @@
 from maze_cell import MazeCell
+from agents.agent1 import Agent1
+from agents.agent2 import Agent2
+from agents.agent3 import Agent3
 from agents.agent4 import Agent4
 
 
