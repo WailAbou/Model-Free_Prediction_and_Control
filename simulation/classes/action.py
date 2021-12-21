@@ -1,4 +1,6 @@
 from enum import Enum
+from typing import List
+
 
 class Action(Enum):
     UP = '↑'
@@ -13,6 +15,16 @@ class Action(Enum):
     @property
     def y(self):
         return action_map[self][1]
+
+    @staticmethod
+    def all() -> List['Action']:
+        return [Action.UP, Action.RIGHT, Action.DOWN, Action.LEFT]
+
+    @staticmethod
+    def by_state(from_state, to_state) -> 'Action':
+        direction =  to_state - from_state
+        action_index = list(action_map.values()).index(direction)
+        return list(action_map.keys())[action_index]
 
     def __str__(self) -> str:
         return self.value
