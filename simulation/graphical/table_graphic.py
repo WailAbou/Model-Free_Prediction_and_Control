@@ -14,7 +14,6 @@ class TableGraphic:
         x = np.concatenate([xv.ravel(), xc.ravel()])
         y = np.concatenate([yv.ravel(), yc.ravel()])
         cstart = (self.w + 1) * (self.w + 1)
-
         trianglesN = [(i + j * (self.w + 1), i + 1 + j * (self.w + 1), cstart + i + j * self.w) for j in range(self.h) for i in range(self.w)]
         trianglesE = [(i + 1 + j * (self.w + 1), i + 1 + (j + 1) * (self.w + 1), cstart + i + j * self.w) for j in range(self.h) for i in range(self.w)]
         trianglesS = [(i + 1 + (j + 1) * (self.w + 1), i + (j + 1) * (self.w + 1), cstart + i + j * self.w) for j in range(self.h) for i in range(self.w)]
@@ -24,19 +23,15 @@ class TableGraphic:
     def visualize(self, values):
         fig, ax = plt.subplots()
         triangul = self.triangulation_for_triheatmap()
-        print(triangul, values)
-
         imgs = [ax.tripcolor(t, np.ravel(val), cmap='RdYlGn', vmin=0, vmax=1, ec='white') for t, val in zip(triangul, values)]
-       
-        for val, dir in zip(values, [(-1, 0), (0, 1), (1, 0), (0, -1)]):
 
+        for val, dir in zip(values, [(-1, 0), (0, 1), (1, 0), (0, -1)]):
             for i in range(self.w):
                 for j in range(self.h):
                     v = val[i][j]
-                    ax.text(i + 0.3 * dir[1], j + 0.3 * dir[0], f'{v:.2f}', color='k' if 0.2 < v < 0.8 else 'w', ha='center', va='center')
+                    ax.text(i + 0.3 * dir[1], j + 0.3 * dir[0], f'{v:.3f}', color='k' if 0.2 < v < 0.8 else 'w', ha='center', va='center')
         
         fig.colorbar(imgs[0], ax=ax)
-
         ax.set_xticks(range(self.w))
         ax.set_yticks(range(self.h))
         ax.invert_yaxis()
@@ -45,8 +40,3 @@ class TableGraphic:
 
         plt.tight_layout()
         plt.show()
-
-
-# table = TableGraphic(4, 4)
-# values = table.get_test_data()
-# table.display(values)

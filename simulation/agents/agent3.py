@@ -13,10 +13,10 @@ class Agent3(BaseAgent):
     def temporal_difference_learning(self) -> float:
         step_size = 0.1
         episode = self.maze.generate_episode(*self.maze.get_random_point(), self.policy)
-        for step in episode:
-            action = self.policy.get_action(self.maze.states, step)
+        for state in episode:
+            action = self.policy.get_action(self.maze.states, state)
             if action == None: break
-            next_state = Maze.get_next_state(self.maze.states, step, action.x, action.y)
-            new_value = step.value + step_size * (next_state.reward + self.discount * (next_state.value - step.value))
-            step.update_value(new_value)
+            next_state = Maze.get_next_state(self.maze.states, state, action)
+            new_value = state.value + step_size * (next_state.reward + self.discount * (next_state.value - state.value))
+            state.update_value(new_value)
         return self.maze.total

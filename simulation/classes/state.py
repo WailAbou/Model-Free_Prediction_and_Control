@@ -48,3 +48,6 @@ class State:
 
     def __sub__(self, other: 'State') -> Tuple[int, int]:
         return (self.x - other.x, self.y - other.y)
+
+    def __lt__(self, other: 'State') -> bool:
+        return (self.y + self.x  * 4) < (other.y + other.x  * 4)

@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from typing import Any, List, Callable
-from simulation.classes import Action, Maze, State, Policy
+from simulation.classes import Maze, State, Policy
 from simulation.graphical.visualizer import Visualizer
 from tqdm import tqdm
 
@@ -11,7 +11,7 @@ class conditional_runner(object):
 
     def __call__(self, caller_source, *args):
         old_total, total, delta, iterations = 0, 1, 0.01, 0
-        min_iterations, max_iterations = 2e4, 1e6
+        min_iterations, max_iterations = 1e4, 1e6
         pbar = tqdm(total=min_iterations)
         while (iterations < min_iterations or abs(total - old_total) > delta) and iterations < max_iterations:
             old_total, total = total, self.algorithm(caller_source, *args)
@@ -24,8 +24,8 @@ class conditional_runner(object):
 class BaseAgent:
     def __init__(self, x: int, y: int, states: List[List[State]], discount: int = 1) -> None:
         self.x, self.y = x, y
-        self.maze = Maze(states)
         self.discount = discount
+        self.maze = Maze(states)
         self.policy = Policy(Policy.greedy)
         self.visualizer = Visualizer()
 

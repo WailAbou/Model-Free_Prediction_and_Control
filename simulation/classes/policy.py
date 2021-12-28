@@ -10,27 +10,27 @@ class Policy:
         self.value_function = value_function
         self.args = args
 
-    def get_actions(self, states: List[List[State]]) -> List[List[Action]]:
+    def get_actions(self, states: List[List[State]]) -> List[List[Optional[Action]]]:
         get_action = lambda state: self.get_action(states, state)
         actions = [list(map(get_action, state_row)) for state_row in states]
         return actions
 
-    def get_action(self, states: List[List[State]], state: State) -> List[Optional[Action]]:
-        info_pairs = Maze.get_neighbouring_info(states, state)
-        action = self.value_function(info_pairs, state, *self.args)
+    def get_action(self, states: List[List[State]], state: State) -> Optional[Action]:
+        neighbours = Maze.get_neighbouring_states(states, state)
+        action = self.value_function(neighbours, state, *self.args)
         return None if state.finish else action
 
     @staticmethod
-    def greedy(info_pairs: Tuple[State, Action], state: State) -> Action:
-        totals = list(map(lambda info_pair: info_pair[0].total, info_pairs))
+    def greedy(neighbours: List[State], state: State) -> Action:
+        totals = list(map(lambda neighbour: neighbour.total, neighbours))
         max_value = max(totals)
-        chosen = info_pairs[totals.index(max_value)][1]
-        return chosen
+        chosen = totals.index(max_value)
+        return Action.all()[chosen]
 
     @staticmethod
-    def random(info_pairs: Tuple[State, Action], state: State) -> Action:
-        return choice(info_pairs)[1]
+    def random(neighbours: List[State], state: State) -> Action:
+        return choice(Action.all())
 
     @staticmethod
-    def optimal(info_pairs: Tuple[State, Action], state: State, actions: List[List[Action]]) -> Action:
+    def optimal(neighbours: List[State], state: State, actions: List[List[Action]]) -> Action:
         return actions[state.y][state.x]

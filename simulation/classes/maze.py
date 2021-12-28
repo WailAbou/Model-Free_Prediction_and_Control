@@ -2,6 +2,7 @@ from typing import List, Tuple
 from simulation.classes.action import Action
 from simulation.classes.state import State
 from random import randrange
+from collections import OrderedDict
 
 
 class Maze:
@@ -9,7 +10,7 @@ class Maze:
         self.states = states
 
     def calculate_values(self, state: State, discount: float) -> float:
-        neighbours = [neighbour[0] for neighbour in self.get_neighbouring_info(self.states, state)]
+        neighbours = self.get_neighbouring_states(self.states, state)
         new_value = state.calculate_values(neighbours, discount)
         return new_value
 
@@ -21,36 +22,44 @@ class Maze:
     def reset_values(self) -> None:
         self.update_values([[0] * len(self.states)] * len(self.states[0]))
 
-    def generate_episode(self, x: int, y: int, policy) -> List[Tuple[State, Action]]:
-        steps = [self.states[y][x]]
-        while not self.states[y][x].finish:
-            action = policy.get_action(self.states, self.states[y][x])
-            if Maze.state_exists(x + action.x, y + action.y):
-                x, y = x + action.x, y + action.y
-            steps.append(self.states[y][x])
-        return steps
+    def generate_episode(self, x: int, y: int, policy, first_visit: bool = True) -> List[Tuple[State, Action]]:
+        state = self.states[y][x]
+        episode = [state]
+        while not state.finish:
+            action = policy.get_action(self.states, state)
+            state = self.take_step(state, action)
+            episode.append(state)
+        return list(OrderedDict.fromkeys(episode)) if first_visit else episode
     
+    def take_step(self, state, action):
+        new_x, new_y = state.x + action.x, state.y + action.y
+        if Maze.state_exists(new_x, new_y):
+            return self.states[new_y][new_x]
+        return state
+
     def get_random_point(self) -> Tuple[int, int]:
         w, h = len(self.states), len(self.states[0])
         return randrange(w), randrange(h)
+
+    @property
+    def end_states(self):
+        return [state for state in sum(self.states, []) if state.finish]
 
     @property
     def total(self):
         return sum(sum(self.states, []))
 
     @staticmethod
-    def get_neighbouring_info(states: List[List[State]], state: State) -> Tuple[State, Action]:
-        info = [
-            (Maze.get_next_state(states, state, 0, -1), Action.UP),
-            (Maze.get_next_state(states, state, 1, 0), Action.RIGHT),
-            (Maze.get_next_state(states, state, 0, 1), Action.DOWN),
-            (Maze.get_next_state(states, state, -1, 0), Action.LEFT)
+    def get_neighbouring_states(states: List[List[State]], state: State) -> List[State]:
+        states = [
+            Maze.get_next_state(states, state, Action.UP), Maze.get_next_state(states, state, Action.RIGHT), 
+            Maze.get_next_state(states, state, Action.DOWN), Maze.get_next_state(states, state, Action.LEFT)
         ]
-        return info
+        return states
     
     @staticmethod
-    def get_next_state(states: List[List[State]], state: State, x_offset: int, y_offset: int) -> State:
-        nx, ny = state.x + x_offset, state.y + y_offset
+    def get_next_state(states: List[List[State]], state: State, action: Action) -> State:
+        nx, ny = state.x + action.x, state.y + action.y
         return states[ny][nx] if Maze.state_exists(nx, ny) else state
 
     @staticmethod
