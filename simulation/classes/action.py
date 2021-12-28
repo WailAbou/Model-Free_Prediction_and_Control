@@ -21,8 +21,8 @@ class Action(Enum):
         return [Action.UP, Action.RIGHT, Action.DOWN, Action.LEFT]
 
     @staticmethod
-    def by_state(from_state, to_state) -> 'Action':
-        direction =  to_state - from_state
+    def by_state(state, next_state) -> 'Action':
+        direction =  next_state - state
         action_index = list(action_map.values()).index(direction)
         return list(action_map.keys())[action_index]
 

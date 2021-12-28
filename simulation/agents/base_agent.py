@@ -30,7 +30,7 @@ class BaseAgent:
         self.visualizer = Visualizer()
 
     @abstractmethod
-    def run(self, print_values: bool=True) -> float:
+    def run(self, visualize: bool = True) -> float:
         raise NotImplementedError()
 
     def visualize(self):

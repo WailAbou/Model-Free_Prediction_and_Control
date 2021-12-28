@@ -22,15 +22,15 @@ class QTable:
         for i in range(0, len(lst), n):
             yield lst[i:i+n]
             
-    def update_value(self, key: Tuple[State, Action], g: float):
-        self.q_values[key] = ReturnValue() if self.q_values.get(key) == None else self.q_values[key].update_average(g)
+    def update_value(self, key: Tuple[State, Action], average: float):
+        self.q_values[key] = ReturnValue() if self.q_values.get(key) == None else self.q_values[key].update_average(average)
 
     def update_probability(self, key: State, index: int, probability: float):
         if key not in self.q_probabilities.keys(): 
             self.q_probabilities[key] = [0, 0, 0, 0]
         self.q_probabilities[key][index] = probability
 
-    def get_a_star_action(self, key: Tuple[State, Action]) -> Action:
-        all_returns = [ReturnValue() if self.q_values.get(key) == None else self.q_values[key] for action in Action.all()]
+    def get_a_star_action(self, state: State) -> Action:
+        all_returns = [ReturnValue() if self.q_values.get((state, action)) == None else self.q_values[(state, action)] for action in Action.all()]
         a_star_return = max(all_returns)
         return Action.all()[all_returns.index(a_star_return)]
