@@ -26,7 +26,7 @@ class BaseAgent:
         self.x, self.y = x, y
         self.discount = discount
         self.maze = Maze(states)
-        self.policy = Policy(Policy.greedy)
+        self.policy = Policy(self.maze, Policy.greedy)
         self.visualizer = Visualizer()
 
     @abstractmethod
@@ -39,8 +39,8 @@ class BaseAgent:
 
     @conditional_runner
     def value_iteration(self) -> float:
-        calculate_values = lambda state: self.maze.calculate_values(state, self.discount)
-        new_values = [list(map(calculate_values, row_states)) for row_states in self.maze.states]
+        calculate_value = lambda state: self.maze.calculate_value(state, self.discount)
+        new_values = [list(map(calculate_value, row_states)) for row_states in self.maze.states]
         self.maze.update_values(new_values)
         return self.maze.total
 

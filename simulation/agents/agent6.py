@@ -3,27 +3,26 @@ from simulation.agents.base_agent import BaseAgent, conditional_runner
 from simulation.classes.tables import QTable
 
 
-class Agent5(BaseAgent):
+class Agent6(BaseAgent):
     alpha: float = 0.1
 
     def run(self, visualize: bool = True) -> float:
         q_table = QTable(self.maze.all_states, Action.all())
         self.policy = Policy(self.maze, Policy.epsilon_greedy, q_table)
 
-        total = self.sarsa(self, q_table)
+        total = self.q_learning(self, q_table)
         if visualize: self.visualizer.visualize_table(q_table.get)
         return total
     
     @conditional_runner
-    def sarsa(self, q_table: QTable) -> float:
+    def q_learning(self, q_table: QTable) -> float:
         x, y = self.maze.get_random_point()
         state = self.maze.states[y][x]
-        action = self.policy.get_action(state)
         while not state.finish:
+            action = self.policy.get_action(state)
             next_state = self.maze.step(state, action)
-            next_action = self.policy.get_action(next_state)
-            if next_action == None: break
 
-            q_table[(state, action)] = q_table[(state, action)] + self.alpha * (next_state.reward + self.discount * q_table[(next_state, next_action)] -  q_table[(state, action)])
-            state, action = next_state, next_action
+            max_q = max([q_table[(next_state, action)] for action in Action.all()])
+            q_table[(state, action)] = q_table[(state, action)] + self.alpha * (next_state.reward + self.discount * max_q -  q_table[(state, action)])
+            state = next_state
         return self.maze.total

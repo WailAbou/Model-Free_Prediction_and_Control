@@ -6,7 +6,7 @@ class Agent3(BaseAgent):
     step_size: float = 0.1
 
     def run(self, visualize: bool = True) -> float:
-        self.policy = Policy(Policy.optimal, self.optimal_actions)
+        self.policy = Policy(self.maze, Policy.optimal, self.optimal_actions)
         total = self.temporal_difference_learning(self)
         if visualize: self.visualize()
         return total
@@ -15,9 +15,9 @@ class Agent3(BaseAgent):
     def temporal_difference_learning(self) -> float:
         episode = self.maze.generate_episode(*self.maze.get_random_point(), self.policy)
         for state in episode:
-            action = self.policy.get_action(self.maze.states, state)
+            action = self.policy.get_action(state)
             if action == None: break
-            next_state = Maze.get_next_state(self.maze.states, state, action)
+            next_state = self.maze.step(state, action)
             new_value = state.value + self.step_size * (next_state.reward + self.discount * (next_state.value - state.value))
             state.update_value(new_value)
         return self.maze.total

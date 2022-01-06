@@ -3,20 +3,21 @@ from typing import Any, Callable, List, Tuple, Optional
 from simulation.classes.action import Action
 from simulation.classes.maze import Maze
 from simulation.classes.state import State
+from simulation.classes.tables import QTable
 
 
 class Policy:
-    def __init__(self, value_function: Callable[[Tuple[State, Action], State], Action], *args: Any) -> None:
+    def __init__(self, maze: Maze, value_function: Callable[[Tuple[State, Action], State], Action], *args: Any) -> None:
+        self.maze = maze
         self.value_function = value_function
         self.args = args
 
     def get_actions(self, states: List[List[State]]) -> List[List[Optional[Action]]]:
-        get_action = lambda state: self.get_action(states, state)
-        actions = [list(map(get_action, state_row)) for state_row in states]
+        actions = [list(map(self.get_action, state_row)) for state_row in states]
         return actions
 
-    def get_action(self, states: List[List[State]], state: State) -> Optional[Action]:
-        neighbours = Maze.get_neighbouring_states(states, state)
+    def get_action(self, state: State) -> Optional[Action]:
+        neighbours = self.maze.get_neighbours(state)
         action = self.value_function(neighbours, state, *self.args)
         return None if state.finish else action
 
@@ -34,3 +35,7 @@ class Policy:
     @staticmethod
     def optimal(neighbours: List[State], state: State, actions: List[List[Action]]) -> Action:
         return actions[state.y][state.x]
+
+    @staticmethod
+    def epsilon_greedy(neighbours: List[State], state: State, q_table: QTable) -> Action:
+        return q_table.get_a_star_action(state)

@@ -19,12 +19,12 @@ class State:
         if not self.finish:
             self.value = new_value
 
-    def calculate_values(self, neighbours: List['State'], discount: float) -> float:
+    def calculate_value(self, neighbours: List['State'], discount: float) -> float:
         if self.finish: return self.value
         elif self.chance == 1: return max([self.bellman_equation(neighbour, discount, self.chance) for neighbour in neighbours])
-        else: return self.calculate_chances(neighbours, discount)
+        else: return self.calculate_chance(neighbours, discount)
 
-    def calculate_chances(self, neighbours: List['State'], discount: float) -> float:
+    def calculate_chance(self, neighbours: List['State'], discount: float) -> float:
         remainder_chance = (1 - self.chance) / 3
         combo = [self.chance, remainder_chance, remainder_chance, remainder_chance]
         chances_combos = [[combo[i%4], combo[(i+1)%4], combo[(i+2)%4], combo[(i+3)%4]] for i in range(len(combo))]

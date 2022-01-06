@@ -10,9 +10,8 @@ class ReturnValue:
         self.average += (g - self.average) / self.size
         return self
 
-    @property
-    def get(self) -> float:
-        return (self.average / self.size) if self.size > 0 else 0
-
     def __lt__(self, other: 'ReturnValue') -> bool:
-        return self.get < other.get
+        return self.average < other.average
+
+    def __sub__(self, other: 'ReturnValue') -> float:
+        return self.average - other.average
